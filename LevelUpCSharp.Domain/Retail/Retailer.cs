@@ -10,7 +10,7 @@ namespace LevelUpCSharp.Retail
     public class Retailer
     {
         private static Retailer _instance;
-        private readonly IDictionary<SandwichKind, List<Sandwich>> _lines;
+        private readonly IDictionary<SandwichKind, Queue<Sandwich>> _lines;
 
         protected Retailer(string name)
         {
@@ -32,12 +32,10 @@ namespace LevelUpCSharp.Retail
                 return Result<Sandwich>.Failed();
             }
 
-            var sandwich = _lines[kind][0];
-            _lines[kind].RemoveAt(0);
+            var sandwich = _lines[kind].Dequeue();
             OnPurchase(DateTimeOffset.Now, sandwich);
 
             return sandwich.AsSuccess();
-            return Result<Sandwich>.Success(sandwich);
         }
 
         public void Pack(IEnumerable<Sandwich> package, string deliver)
@@ -47,7 +45,7 @@ namespace LevelUpCSharp.Retail
             Dictionary<SandwichKind, int> sums = new Dictionary<SandwichKind, int>();
             foreach (var sandwich in package)
             {
-                _lines[sandwich.Kind].Add(sandwich);
+                _lines[sandwich.Kind].Enqueue(sandwich);
 
                 if (sums.ContainsKey(sandwich.Kind) == false)
                 {
@@ -78,13 +76,13 @@ namespace LevelUpCSharp.Retail
             Purchase?.Invoke(time, product);
         }
 
-        private IDictionary<SandwichKind, List<Sandwich>> InitializeLines()
+        private IDictionary<SandwichKind, Queue<Sandwich>> InitializeLines()
         {
-            var result = new Dictionary<SandwichKind, List<Sandwich>>();
+            var result = new Dictionary<SandwichKind, Queue<Sandwich>>();
 
             foreach (var sandwichKind in EnumHelper.GetValues<SandwichKind>())
             {
-                result.Add(sandwichKind, new List<Sandwich>());
+                result.Add(sandwichKind, new Queue<Sandwich>());
             }
 
             return result;

@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using LevelUpCSharp.Collections;
 
 namespace LevelUpCSharp.Products
 {
-    public class Sandwich
+    public class Sandwich : IKindable<SandwichKind>
     {
         private readonly SandwichKind _kind;
         private readonly DateTimeOffset _expirationDate;
