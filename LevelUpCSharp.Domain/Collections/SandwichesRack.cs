@@ -7,19 +7,19 @@ using LevelUpCSharp.Products;
 
 namespace LevelUpCSharp.Collections
 {
-	internal class Rack : ISandwichesRack<SandwichKind, Sandwich>
+	internal class SandwichesRack : IRack<SandwichKind, Sandwich>
 	{
 		private readonly IDictionary<SandwichKind, Queue<Sandwich>> _lines;
 		private readonly Comparison<Sandwich> _comparison;
 		private int _amount;
 
-		public Rack()
+		public SandwichesRack()
 		{
 			_lines = InitializeLines();
 			_comparison = DefaultComparer;
 		}
 
-		public Rack(Comparison<Sandwich> comparison)
+		public SandwichesRack(Comparison<Sandwich> comparison)
 		{
 			if (comparison == null)
 			{
@@ -30,12 +30,12 @@ namespace LevelUpCSharp.Collections
 			_comparison = comparison;
 		}
 
-		public Rack(IEnumerable<Sandwich> initialSandwiches) 
+		public SandwichesRack(IEnumerable<Sandwich> initialSandwiches) 
 			: this(initialSandwiches, DefaultComparer)
 		{
 		}
 
-		public Rack(IEnumerable<Sandwich> initialSandwiches, Comparison<Sandwich> comparison)
+		public SandwichesRack(IEnumerable<Sandwich> initialSandwiches, Comparison<Sandwich> comparison)
 			: this(comparison)
 		{
 			if (initialSandwiches == null)

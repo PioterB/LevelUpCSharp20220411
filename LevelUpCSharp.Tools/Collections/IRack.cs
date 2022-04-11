@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace LevelUpCSharp.Collections
 {
-	internal interface ISandwichesRack<TKey, TItem> : IEnumerable<TItem> where TItem : IKindable<TKey>
+	public interface IRack<TKey, TItem> : IEnumerable<TItem> where TItem : IKindable<TKey>
 	{
 		/// <summary>
 		/// Gets actual number of <see cref="TItem"/> being on the Rack
