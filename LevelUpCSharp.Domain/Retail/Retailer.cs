@@ -35,6 +35,8 @@ namespace LevelUpCSharp.Retail
             var sandwich = _lines[kind][0];
             _lines[kind].RemoveAt(0);
             OnPurchase(DateTimeOffset.Now, sandwich);
+
+            return sandwich.AsSuccess();
             return Result<Sandwich>.Success(sandwich);
         }
 
