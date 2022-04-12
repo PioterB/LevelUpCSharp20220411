@@ -21,7 +21,11 @@ namespace LevelUpCSharp.Linq.Queries
 				new Numbers(100).Select(x => allCompanies[random.Next(0, 9)].CreateEmployee());
 
 			// act, get all companies where in minimum one employee earn a salear greater than 2500
-			var companiesWithHighSalary = allPersons.Select(x => x.Company);
+			var companiesWithHighSalary = allPersons
+				.Where(p => p.Salear > 2500)
+				.Select(p => p.Company)
+				.Distinct()
+				.ToArray();
 
 
 			// assert

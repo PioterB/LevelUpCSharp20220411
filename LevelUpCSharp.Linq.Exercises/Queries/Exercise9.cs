@@ -18,20 +18,22 @@ namespace LevelUpCSharp.Linq.Queries
 			Person[] allPersons = new Numbers(10).Select(x => new Person((x).ToString())).ToArray();
 
 			// act,  match for each company the appropriate person
-			Dictionary<Company, Person> match = new Dictionary<Company, Person>();
-			for (int i = 0; i < allCompanies.Count(); i++)
-			{
-				match.Add(allCompanies[i], allPersons[i]);
-			}
+			var result = allCompanies
+				.Zip(
+					allPersons,
+					(company, person) =>
+						new
+						{
+							Key = company,
+							Value = person
+						});
 
 
 			// assert
-			Assert.Fail("use linq tomatch for each company the appropriate person");
-			foreach (var item in match)
+			foreach (var item in result)
 			{
 				Assert.AreEqual(item.Key.Name, item.Value.Name);
 			}
-
 		}
 
 	}
