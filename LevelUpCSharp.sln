@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LevelUpCSharp.Tools", "Leve
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LevelUpCSharp.Linq.Exercises", "LevelUpCSharp.Linq.Exercises\LevelUpCSharp.Linq.Exercises.csproj", "{DF35D7E4-F5FD-48D3-A928-23ECCED2505E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LevelUpCSharp.Concurrency", "LevelUpCSharp.Concurrency\LevelUpCSharp.Concurrency.csproj", "{02D6DF6A-3014-453E-998D-73C686024E18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{DF35D7E4-F5FD-48D3-A928-23ECCED2505E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF35D7E4-F5FD-48D3-A928-23ECCED2505E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF35D7E4-F5FD-48D3-A928-23ECCED2505E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02D6DF6A-3014-453E-998D-73C686024E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02D6DF6A-3014-453E-998D-73C686024E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02D6DF6A-3014-453E-998D-73C686024E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02D6DF6A-3014-453E-998D-73C686024E18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
