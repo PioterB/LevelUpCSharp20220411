@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 using LevelUpCSharp.Production.Ingredients;
 using LevelUpCSharp.Products;
 
@@ -66,6 +62,7 @@ namespace LevelUpCSharp.Production
                 {SandwichKind.Chicken, 0},
                 {SandwichKind.Beef, 0},
                 {SandwichKind.Pork, 0},
+                {SandwichKind.Deer, 0},
             };
 
             foreach (var sandwich in _warehouse)
@@ -89,18 +86,19 @@ namespace LevelUpCSharp.Production
         {
             return kind switch
             {
-                SandwichKind.Beef => ProduceSandwich(kind, DateTimeOffset.Now.AddMinutes(3)),
-                SandwichKind.Cheese => ProduceSandwich(kind, DateTimeOffset.Now.AddSeconds(90)),
-                SandwichKind.Chicken => ProduceSandwich(kind, DateTimeOffset.Now.AddMinutes(4)),
-                SandwichKind.Pork => ProduceSandwich(kind, DateTimeOffset.Now.AddSeconds(150)),
+                SandwichKind.Beef => ProduceSandwich(new Beef(), DateTimeOffset.Now.AddMinutes(3)),
+                SandwichKind.Cheese => ProduceSandwich(new Cheese(), DateTimeOffset.Now.AddSeconds(90)),
+                SandwichKind.Chicken => ProduceSandwich(new Chicken(), DateTimeOffset.Now.AddMinutes(4)),
+                SandwichKind.Pork => ProduceSandwich(new Pork(), DateTimeOffset.Now.AddSeconds(150)),
+                SandwichKind.Deer => ProduceSandwich(new Deer(), DateTimeOffset.Now.AddSeconds(150)),
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
             };
         }
 
-        private Sandwich ProduceSandwich(SandwichKind kind, DateTimeOffset addMinutes)
+        private Sandwich ProduceSandwich(IKeyIngredient kind, DateTimeOffset addMinutes)
         {
 	        var sandwich = SandwichBuilder.WithButter(false)
-								.Use(new Cheese())
+								.Use(kind)
 								.AddGarnish(new Tommato())
 								.AddGarnish(new Cheese())
 								.AddGarnish(new Onion())

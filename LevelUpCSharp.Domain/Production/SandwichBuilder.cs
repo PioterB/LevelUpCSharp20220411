@@ -57,7 +57,7 @@ namespace LevelUpCSharp.Production
 			var ingredients = _ingredients.AsStrings().ToArray();
 			return new Sandwich(
 				_keyIngredient.Kind,
-				expDate,
+				DateTimeOffset.Now.AddDays(3),
 				ingredients);
 		}
 	}
