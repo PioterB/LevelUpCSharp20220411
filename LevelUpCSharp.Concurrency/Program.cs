@@ -27,21 +27,9 @@ namespace LevelUpCSharp.Concurrency
             while (true)
             {
                 var found = r.Next(100);
-
-                Console.WriteLine("[B] i have: " + found);
-				lock (vault)
-				{
-					vault.Put(found);
-					Console.WriteLine("[B] stored: " + found);
-
-					Console.WriteLine("[B] break");
-					Thread.Sleep(3 * 1000);
-					Console.WriteLine("[B] after break");
-
-
-					var get = vault.Get();
-					Console.WriteLine("[B] get:" + get);
-                }
+                Console.WriteLine("[B] inserting: " + found);
+                vault.Put(found);
+                Console.WriteLine("[B] stored: " + found);
 
                 Thread.Sleep(3 * 1000);
             }
@@ -53,23 +41,10 @@ namespace LevelUpCSharp.Concurrency
 
             while (true)
             {
-                var found = r.Next(100);
-
-                Console.WriteLine("[A] i have: " + found);
-				lock (vault)
-				{
-					vault.Put(found);
-					Console.WriteLine("[A] stored: " + found);
-
-					Console.WriteLine("[A] break");
-					Thread.Sleep(7 * 1000);
-					Console.WriteLine("[A] after break");
-
-					var get = vault.Get();
-					Console.WriteLine("[A] get:" + get);
-				}
-
-                Thread.Sleep(7 * 1000);
+	            Console.WriteLine("[A] waiting");
+	            Thread.Sleep(7 * 1000);
+	            var get = vault.Get(); 
+	            Console.WriteLine("[A] get:" + get);
             }
         }
     }
