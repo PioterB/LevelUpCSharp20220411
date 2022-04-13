@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using LevelUpCSharp.Collections;
 using LevelUpCSharp.Helpers;
 using LevelUpCSharp.Production.Ingredients;
 using LevelUpCSharp.Products;
@@ -111,21 +112,14 @@ namespace LevelUpCSharp.Production
 		        var kind = Rand.Next(sandwichKinds.Length);
 
 		        _orders.Enqueue(new PendingOrder(1, (SandwichKind)kind));
+		        var temp = _orders.ToArray();
+				_orders.Clear();
+				var s2 = temp.AsParallel()
+					.Select(o => Produce(o.Kind, o.Amount))
+					.SelectMany(o => o).ToArray();
 
-		        var productionTasks = new List<Task<IEnumerable<Sandwich>>>();
-                while ( _orders.TryDequeue(out var pendingOrder))
-		        {
-			        var orderItemProductionTask = Task.Factory.StartNew(() => Produce(pendingOrder.Kind, pendingOrder.Amount));
-			        productionTasks.Add(orderItemProductionTask);
-			        Thread.Sleep(1 * 500);
-		        }
-
-                Task.WaitAll(productionTasks.ToArray());
-                var sandwiches = productionTasks.SelectMany(tasks => tasks.Result).ToList();
-                sandwiches.ForEach(sandwich => _warehouse.Enqueue(sandwich));
-                Produced?.Invoke(sandwiches.ToArray());
-
-                productionTasks.Clear();
+				s2.ForEach(sandwich => _warehouse.Enqueue(sandwich));
+				Produced?.Invoke(s2.ToArray());
 
                 Thread.Sleep(5 * 1000);
 	        }
