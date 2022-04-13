@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using LevelUpCSharp.Collections;
 using LevelUpCSharp.Products;
+using Newtonsoft.Json;
 
 namespace LevelUpCSharp.Retail
 {
@@ -37,12 +40,25 @@ namespace LevelUpCSharp.Retail
             return sandwich.AsSuccess();
         }
 
-        public void Pack(IEnumerable<Sandwich> package, string deliver)
+        public void Pickup()
         {
-            package = package.ToArray();
-            PopulateRack(package);
-            var summary = ComputeReport(package, deliver);
-            OnPacked(summary);
+	        try
+	        {
+		        IEnumerable<Sandwich> sandwiches;
+		        using (var connection = BuildConnection())
+		        {
+			        using (var stream = connection.GetStream())
+			        {
+				        SendCommand(stream);
+				        sandwiches = ReadResponse(stream);
+			        }
+		        }
+
+		        Pack(sandwiches, "remote");
+	        }
+	        catch (SocketException)
+	        {
+	        }
         }
 
         protected virtual void OnPacked(PackingSummary summary)
@@ -53,6 +69,14 @@ namespace LevelUpCSharp.Retail
         protected virtual void OnPurchase(DateTimeOffset time, Sandwich product)
         {
             Purchase?.Invoke(time, product);
+        }
+
+        private void Pack(IEnumerable<Sandwich> package, string deliver)
+        {
+	        package = package.ToArray();
+	        PopulateRack(package);
+	        var summary = ComputeReport(package, deliver);
+	        OnPacked(summary);
         }
 
         private void PopulateRack(IEnumerable<Sandwich> package)
@@ -71,5 +95,28 @@ namespace LevelUpCSharp.Retail
 	        var summary = new PackingSummary(summaryPositions, deliver);
 	        return summary;
         }
+
+        #region networking
+        private TcpClient BuildConnection()
+        {
+	        throw new NotImplementedException();
+        }
+
+        private IEnumerable<Sandwich> ReadResponse(NetworkStream stream)
+        {
+	        using (var sr = new StreamReader(stream))
+	        {
+		        using (var jsonReader = new JsonTextReader(sr))
+		        {
+			        return new JsonSerializer().Deserialize<IEnumerable<Sandwich>>(jsonReader);
+		        }
+	        }
+        }
+
+        private void SendCommand(NetworkStream stream)
+        {
+	        throw new NotImplementedException();
+        }
+        #endregion
     }
 }

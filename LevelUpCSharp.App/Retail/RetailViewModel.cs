@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 using GalaSoft.MvvmLight;
+using GalaSoft.MvvmLight.Command;
 using LevelUpCSharp.Collections;
 using LevelUpCSharp.Helpers;
 using LevelUpCSharp.Products;
@@ -18,10 +20,12 @@ namespace LevelUpCSharp.Retail
             Logs = new ObservableCollection<string>();
             Retailer.Instance.Packed += OnPacked;
             Retailer.Instance.Purchase += OnPurchase;
+            Pickup = new RelayCommand(OnPickup);
         }
 
         public IEnumerable<LineSummaryViewModel> Lines => _lines.Values;
         public ObservableCollection<string> Logs { get; }
+        public ICommand Pickup { get; set; }
 
         private IDictionary<SandwichKind, LineSummaryViewModel> InitializeLines()
         {
@@ -43,15 +47,14 @@ namespace LevelUpCSharp.Retail
 
         private void OnPacked(PackingSummary summary)
         {
-            summary.Positions.ForEach(TopUp);
+	        summary.Positions.ForEach(position => _lines[position.Kind].TopUp(position.Added));
 
-            /* add total number of added items to log statement */
-            Logs.Add($"{summary.TimeStamp} topped up, {summary.Vendor}.");
+	        Logs.Add($"{summary.TimeStamp} topped up, {summary.Vendor}.");
         }
 
-        private void TopUp(LineSummary summaryPosition)
+        private void OnPickup()
         {
-	        _lines[summaryPosition.Kind].TopUp(summaryPosition.Added);
+	        Retailer.Instance.Pickup();
         }
     }
 }
