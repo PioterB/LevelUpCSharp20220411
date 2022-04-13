@@ -60,7 +60,7 @@ namespace LevelUpCSharp.Collections
 
 		public bool Contains(SandwichKind kind)
 		{
-			return _lines.ContainsKey(kind) == false || _lines[kind].Count == 0;
+			return _lines.ContainsKey(kind) && _lines[kind].Count > 0;
 		}
 
 		public Sandwich Get(SandwichKind kind)
