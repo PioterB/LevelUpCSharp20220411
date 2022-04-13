@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using LevelUpCSharp.Helpers;
 using LevelUpCSharp.Production.Ingredients;
 using LevelUpCSharp.Products;
@@ -72,17 +73,20 @@ namespace LevelUpCSharp.Production
             return result;
         }
 
-        private Sandwich Produce(SandwichKind kind)
+        private IEnumerable<Sandwich> Produce(SandwichKind kind, int amount = 1)
         {
-            return kind switch
-            {
-                SandwichKind.Beef => ProduceSandwich(new Beef(), DateTimeOffset.Now.AddMinutes(3)),
-                SandwichKind.Cheese => ProduceSandwich(new Cheese(), DateTimeOffset.Now.AddSeconds(90)),
-                SandwichKind.Chicken => ProduceSandwich(new Chicken(), DateTimeOffset.Now.AddMinutes(4)),
-                SandwichKind.Pork => ProduceSandwich(new Pork(), DateTimeOffset.Now.AddSeconds(150)),
-                SandwichKind.Deer => ProduceSandwich(new Deer(), DateTimeOffset.Now.AddSeconds(150)),
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
-            };
+	        while (amount -- > 0)
+	        {
+		        yield return  kind switch
+		        {
+			        SandwichKind.Beef => ProduceSandwich(new Beef(), DateTimeOffset.Now.AddMinutes(3)),
+			        SandwichKind.Cheese => ProduceSandwich(new Cheese(), DateTimeOffset.Now.AddSeconds(90)),
+			        SandwichKind.Chicken => ProduceSandwich(new Chicken(), DateTimeOffset.Now.AddMinutes(4)),
+			        SandwichKind.Pork => ProduceSandwich(new Pork(), DateTimeOffset.Now.AddSeconds(150)),
+			        SandwichKind.Deer => ProduceSandwich(new Deer(), DateTimeOffset.Now.AddSeconds(150)),
+			        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+		        };
+	        }
         }
 
         private Sandwich ProduceSandwich(IKeyIngredient kind, DateTimeOffset addMinutes)
@@ -106,30 +110,24 @@ namespace LevelUpCSharp.Production
 	        {
 		        var kind = Rand.Next(sandwichKinds.Length);
 
-                var sandwich = Produce((SandwichKind)kind);
-                _warehouse.Enqueue(sandwich);
+		        _orders.Enqueue(new PendingOrder(1, (SandwichKind)kind));
 
-		        Produced?.Invoke(new[] { sandwich });
-
-		        foreach (var pendingOrder in _orders)
+		        var productionTasks = new List<Task<IEnumerable<Sandwich>>>();
+                while ( _orders.TryDequeue(out var pendingOrder))
 		        {
-			        var sandwiches = new List<Sandwich>();
-
-			        for (int i = 0; i < pendingOrder.Amount; i++)
-			        {
-				        sandwich = Produce(pendingOrder.Kind);
-				        _warehouse.Enqueue(sandwich);
-
-				        sandwiches.Add(sandwich);
-				        Thread.Sleep(1 * 500);
-			        }
-
-			        Produced?.Invoke(sandwiches.ToArray());
-
+			        var orderItemProductionTask = Task.Factory.StartNew(() => Produce(pendingOrder.Kind, pendingOrder.Amount));
+			        productionTasks.Add(orderItemProductionTask);
 			        Thread.Sleep(1 * 500);
 		        }
-                
-		        Thread.Sleep(5 * 1000);
+
+                Task.WaitAll(productionTasks.ToArray());
+                var sandwiches = productionTasks.SelectMany(tasks => tasks.Result).ToList();
+                sandwiches.ForEach(sandwich => _warehouse.Enqueue(sandwich));
+                Produced?.Invoke(sandwiches.ToArray());
+
+                productionTasks.Clear();
+
+                Thread.Sleep(5 * 1000);
 	        }
         }
         
