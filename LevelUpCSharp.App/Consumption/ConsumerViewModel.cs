@@ -21,9 +21,8 @@ namespace LevelUpCSharp.Consumption
 
         private async void BuyAndEat(SandwichKind kind)
         {
-	        var purchase = await Task.Run(() => Retailer.Instance.Sell(kind));
-
-            //var purchase = await Retailer.Instance.SellAsync(kind);
+	        // var purchase = await Task.Run(() => Retailer.Instance.Sell(kind));
+	        var purchase = await Retailer.Instance.SellAsync(kind);
             if (purchase.Fail)
             {
                 return;
