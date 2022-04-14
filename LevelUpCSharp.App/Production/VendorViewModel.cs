@@ -52,14 +52,15 @@ namespace LevelUpCSharp.Production
             _vendor.Order(Dictionaries.SandwichKinds[kind], 1);
         }
 
-        private void OnDistribution()
+        private async void OnDistribution()
         {
             var sandwiches = _vendor.Buy();
 
             Stock = BuildStock(_vendor.GetStock());
             RaisePropertyChanged(nameof(Stock));
 
-            Retailer.Instance.Pack(sandwiches, _vendor.Name);
+            //Retailer.Instance.Pack(sandwiches, _vendor.Name);
+            await Retailer.Instance.PackAsync(sandwiches, _vendor.Name);
         }
 
         private void OnProduced(Sandwich[] sandwiches)
