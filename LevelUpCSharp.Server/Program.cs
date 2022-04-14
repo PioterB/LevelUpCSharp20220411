@@ -77,14 +77,36 @@ namespace LevelUpCSharp.Server
 
                 Console.WriteLine("Received: {0}", cmd);
 
-                var sandwiches = GetSandwiches();
+                // cmd sample: p+s
+                // [ctrl]+[worker]
+
+                var command = ParseCommand(cmd);
+
+                var sandwiches = Execution(command);//= GetSandwiches();
 
                 SendResponse(sandwiches, stream);
 
                 Console.WriteLine("Responsed");
             }
-
         }
+
+        private static IEnumerable<Sandwich> Execution(Command command)
+        {
+	        var handler = _handlers[command.Ctrl];
+	        var worker = handler.Methods[command.Worker];
+
+	        var ctrl = ConstructHandler(handler.Type);
+	        var sandwiches = (IEnumerable<Sandwich>)InvokeWorker(handler.Type, worker, ctrl);
+	        return sandwiches;
+        }
+
+        private static Command ParseCommand(string cmd)
+        {
+	        var parts = cmd.Split("+");
+
+	        return new Command(parts[0], parts[1]);
+        }
+
         private static string ReadCommand(NetworkStream stream)
         {
 	        Byte[] bytes = new Byte[256];
@@ -145,5 +167,18 @@ namespace LevelUpCSharp.Server
         }
 
         #endregion
+    }
+
+    internal class Command
+    {
+	    public Command(string ctrl, string worker)
+	    {
+		    Ctrl = ctrl;
+		    Worker = worker;
+	    }
+
+	    public string Ctrl { get; }
+
+	    public string Worker { get; }
     }
 }

@@ -117,7 +117,7 @@ namespace LevelUpCSharp.Retail
 
         private void SendCommand(NetworkStream stream)
         {
-	        var data = System.Text.Encoding.ASCII.GetBytes("p+s");
+	        var data = System.Text.Encoding.ASCII.GetBytes("p+b");
 	        stream.Write(data, 0, data.Length);
         }
         #endregion
