@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,6 +22,8 @@ namespace LevelUpCSharp.Server
 
         static void Main(string[] args)
         {
+	        _handlers = ScanForHandlers(Assembly.GetExecutingAssembly());
+
             var server = BuildServer();
 
             // Start listening for client requests.
@@ -32,6 +35,8 @@ namespace LevelUpCSharp.Server
 
             Console.ReadKey(true);
             Console.WriteLine("Killing server...");
+            server.Stop();
+            Console.WriteLine("Killed");
         }
 
         private static void Listen(TcpListener server)
@@ -59,7 +64,8 @@ namespace LevelUpCSharp.Server
         #region networking
         private static TcpListener BuildServer()
         {
-            throw new NotImplementedException();
+	        var server = new TcpListener(IPAddress.Any, 13000);
+	        return server;
         }
 
         private static void ProcessRequest(TcpClient client)
@@ -72,7 +78,7 @@ namespace LevelUpCSharp.Server
                 Console.WriteLine("Received: {0}", cmd);
 
                 var sandwiches = GetSandwiches();
-                
+
                 SendResponse(sandwiches, stream);
 
                 Console.WriteLine("Responsed");
@@ -81,7 +87,14 @@ namespace LevelUpCSharp.Server
         }
         private static string ReadCommand(NetworkStream stream)
         {
-            throw new NotImplementedException();
+	        Byte[] bytes = new Byte[256];
+	        string data;
+
+	        var i = stream.Read(bytes, 0, bytes.Length);
+
+	        // Translate data bytes to a ASCII string.
+	        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+	        return data;
         }
 
         public static void SendResponse<TValue>(TValue value, Stream s)
@@ -100,34 +113,33 @@ namespace LevelUpCSharp.Server
         #endregion
         
         #region reflection
-
-        private static object InvokeWorker(Route handler, string method, object instance)
+        private static object InvokeWorker(Type handler, string method, object instance)
         {
-            throw new NotImplementedException();
+	        return handler.GetMethod(method).Invoke(instance, null);
         }
 
-        private static object ConstructHandler(Route handler)
+        private static object ConstructHandler(Type handler)
         {
-            throw new NotImplementedException();
+	        return Activator.CreateInstance(handler, _vendors);
         }
 
         private static IDictionary<string, Route> ScanForHandlers(Assembly assembly)
         {
-            var ctrlType = typeof(CtrlAttribute);
+            var handlerAttribute = typeof(CtrlAttribute);
 
-
-            return Reflector.FindByAttributes(assembly, ctrlType)
+            return Reflector.FindByAttributes(assembly, handlerAttribute)
                 .ToDictionary(
-                    t => ((CtrlAttribute) t.GetCustomAttribute(ctrlType)).Name,
+                    typeInfo => ((CtrlAttribute) typeInfo.GetCustomAttribute(handlerAttribute)).Name,
                     BuildMethodMap);
         }
 
         private static Route BuildMethodMap(TypeInfo ctrl)
         {
-            var workerType = typeof(WorkerAttribute);
-            var methods = Reflector.FindByAttributes(ctrl, workerType)
+            var workerAttribute = typeof(WorkerAttribute);
+
+            var methods = Reflector.FindByAttributes(ctrl, workerAttribute)
                 .ToDictionary(
-                    m => ((WorkerAttribute) m.GetCustomAttribute(workerType)).Name,
+                    m => ((WorkerAttribute) m.GetCustomAttribute(workerAttribute)).Name,
                     m => m.Name);
             return new Route(ctrl, methods);
         }
